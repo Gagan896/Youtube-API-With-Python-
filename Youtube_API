@@ -1,0 +1,48 @@
+# Created By : GAGANDEEP SINGH
+
+import pandas as pd
+import requests
+import time
+
+#first API call
+api_key='AIzaSyD6a3mzghuRLC15VJhP5eQVq79ctlx387Q'
+channel_id="UCW8Ews7tdKKkBT6GdtQaXvQ"
+url='https://youtube.googleapis.com/youtube/v3/search?&key='+api_key+'&channelId='+channel_id+'&part=snippet&maxResults=100'
+response=requests.get(url)
+data=response.json()
+time.sleep(1)
+# building dataframe
+df=pd.DataFrame(columns=['video_id','video_title','upload_date','view_count','like_count','dislike_count','comment_count'])
+
+# count=0
+for video in data['items']:
+    if video['id']['kind']=='youtube#video':
+        video_id=video['id']['videoId']
+        video_title=video['snippet']['title']
+        upload_date=video['snippet']['publishedAt']
+        upload_date=str(upload_date).split("T")[0]
+        # print(video_id)
+        # print(video_title)
+        # print(upload_date)
+        
+        #2nd API Call for stats
+        url_video_stats='https://youtube.googleapis.com/youtube/v3/videos?id='+video_id+'&part=statistics&key='+api_key
+        response_video_stats=requests.get(url_video_stats)
+        stats=response.json()
+        view_count=stats['items'][0]['statistics']['viewCount']
+        like_count=stats['items'][0]['statistics']['likeCount']
+        dislike_count=stats['items'][0]['statistics']['dislikeCount']
+        comment_count=stats['items'][0]['statistics']['commentCount']
+    # count+=1
+    #saving data in pandas dataframe
+    df=df.append({'video_id':video_id,'video_title':video_title,
+    'upload_date':upload_date, 'view_count':view_count,'like_count':like_count,
+    'dislike_count':dislike_count,'comment_count':comment_count},
+    ignore_index=True
+    )
+print(df)      
+
+
+
+
+
